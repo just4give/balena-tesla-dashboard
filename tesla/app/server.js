@@ -9,7 +9,7 @@ const tjs = require('teslajs');
 const axios = require('axios');
 const e = require('express');
 
-var token = "qts-c88f1ad1cdb9e962ab82278f46d03c3eb53494a8a2cace2da294c486c749b9b6";
+var token ;
 let vehicle;
 // set the view engine to ejs
 //app.set('view engine', 'ejs');
@@ -20,8 +20,7 @@ app.use(express.urlencoded({
   extended: true
 }));
 
-//timestamp,elevation,est_heading,est_lat,est_lng,est_range,heading,odometer,power,range,shift_state,speed,soc
-//'1622420982043,45,309,41.375745,-72.215410,259,309,3042.6,0,276,,,88'
+
 function streamTele(socket,vehicle){
     console.log("startStreaming...");
     //console.log(vehicle);
@@ -117,13 +116,14 @@ app.get('/', async function(req, res) {
      console.log("submit login ", req.body);
 
      if (fs.existsSync('.token')) {
+        console.log('Token exists');
         let tokenJson = fs.readFileSync(".token");
         tokenJson = JSON.parse(tokenJson);
         console.log(tokenJson);
         let vehicles =  await tjs.vehiclesAsync({authToken: tokenJson.authToken});
         res.json({success:true, vehicles:vehicles});
      }else{
-
+        console.log('Token does not  exist. Obtain new.');
         let result = await  tjs.loginAsync({username: req.body.username,password: req.body.password});
          if(result.error){
             res.json({success:false});
@@ -133,6 +133,7 @@ app.get('/', async function(req, res) {
             var token = {authToken: result.authToken ,refreshToken: result.refreshToken};
             let vehicles =  await tjs.vehiclesAsync({authToken: result.authToken});
             fs.writeFileSync(".token",JSON.stringify(token));
+            console.log('New token obtained');
             res.json({success:true, vehicles:vehicles})
         }
      }
