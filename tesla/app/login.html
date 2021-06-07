@@ -1,0 +1,119 @@
+<html>
+    <head>
+        <title>Tesla Dash</title>
+        <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+ 
+        <link rel="stylesheet" href="./static/css/login.css">
+        
+    </head>
+    <body>
+        
+        <!-- <div class="tesla-logo">
+            <h1 id="name"></h1>
+            <h4 id="state"></h4>
+            <img src="./static/images/tesla-logo.png">
+        </div> -->
+        <div class="canvas">
+            <div>
+                <img class="logo" src="./static/images/tesla-logo.png">
+            </div>
+            <table class="login-table" id="login-table" >
+                <tr>
+                    <td>
+                        <input type="text" id="username" placeholder="Type your tesla username">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="password" id="password" placeholder="Type your tesla password">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button id="login">LOGIN</button>
+                    </td>
+                </tr>
+                
+            </table>
+
+            <table id="select-vehicle">
+                <tr>
+                    <td>
+                        <select id="vehicleDropdown"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button id="select-btn">SELECT</button>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="disclaimer">
+                <p>Your credential is not shared with developer or stored on your device. It's directly sent to Telsa to obtain access token which is stored on your device locally</p>
+                  
+            </div>
+
+        </div>
+        
+        <script src = "/socket.io/socket.io.js"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script>
+           
+
+           $(document).ready(function(){
+            
+                console.log('jQuery is ready for login page');
+                $("#select-vehicle").hide();
+                
+                $("#login").click(()=>{
+                    console.log("login clicked");
+                    var username = $("#username").val();
+                    var password = $("#password").val();
+                    var data = {username:username,password:password };
+                    console.log(data);
+
+                    $.post( "/login",data, function(response) {
+                        console.log(response);
+                        if(response.success === true){
+                            $("#login-table").hide();
+                            $("#select-vehicle").show();
+
+                            let vehicles = response.vehicles;
+                            vehicles.forEach(v=>{
+                                $('#vehicleDropdown').append('<option value="' + v.id_s + '">' + v.display_name + '</option>');
+                            })
+                        }
+                    })
+                    .done(function() {
+                        
+                    })
+                    .fail(function() {
+                        alert( "error" );
+                    })
+                })
+
+                $("#select-btn").click(()=>{
+                    var vehicleId = $("#vehicleDropdown").val();
+                    console.log(`selected vehicle ${vehicleId}`);
+
+                    $.post( "/vehicle/"+vehicleId,{}, function(response) {
+                        console.log(response);
+                        window.location.href='dash';
+                        
+                    })
+                    .done(function() {
+                        
+                    })
+                    .fail(function() {
+                        alert( "error" );
+                    })
+                })
+                
+        
+            });
+
+        </script>
+
+    </body>
+</html>
